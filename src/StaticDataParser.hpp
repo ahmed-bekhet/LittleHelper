@@ -1,7 +1,12 @@
 #ifndef STATIC_DATA_PARSER_HPP
 #define STATIC_DATA_PARSER_HPP
 
+#include <map>
+
 #include "IDataParser.hpp"
+#include "intents/FactIntent.hpp"
+#include "intents/WeatherIntent.hpp"
+#include "intents/WeatherCityIntent.hpp"
 
 class StaticDataParser : public IDataParser
 {
@@ -13,6 +18,11 @@ public:
     void run() override;
 
 private:
+    void startReceivingData();
+    std::shared_ptr<Intent> parseData(std::string data) const;
+    void handleIntent(std::shared_ptr<Intent> intent) const;
+
+    const std::map<std::string, Intent::IntentType> m_staticQueries;
 };
 
 #endif
