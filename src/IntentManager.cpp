@@ -6,7 +6,7 @@ IntentManager IntentManager::m_intentManager;
 
 IntentManager::IntentManager() :
 m_staticQueryEngine(std::make_shared<StaticQueryEngine>()),
-m_staticDataParser(std::make_unique<StaticDataParser>(m_staticQueryEngine))
+m_staticDataParser(std::make_unique<StaticDataParser>(m_staticQueryEngine, std::cin, std::cout, std::cerr))
 {}
 
 IntentManager::~IntentManager()

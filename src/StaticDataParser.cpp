@@ -3,22 +3,21 @@
 
 #include "StaticDataParser.hpp"
 
-StaticDataParser::StaticDataParser(std::shared_ptr<IQueryEngine> queryEngine) :
-IDataParser(queryEngine),
+StaticDataParser::StaticDataParser(std::shared_ptr<IQueryEngine> queryEngine, std::istream& input,  std::ostream& output, std::ostream& error) :
+IDataParser(queryEngine, input, output, error),
 m_staticQueries{
     {"What is the weather like today?", Intent::IntentType::WEATHER},
     {"What is the weather like in Paris today?", Intent::IntentType::WEATHER_CITY},
     {"Tell me an interesting fact.", Intent::IntentType::FACT}
 }
 {
-
 }
 
 bool StaticDataParser::init()
 {
     if(!m_queryEngine->init())
     {
-        std::cerr << "Failed to Initialize Query Engine..." << std::endl;
+        m_error << "Failed to Initialize Query Engine..." << std::endl;
 
         return false;
     }
@@ -30,22 +29,23 @@ void StaticDataParser::run()
 {
     std::string userData;
     std::shared_ptr<Intent> userIntent;
-    while(1)
+
+    m_stopSignal.store(false);
+
+    while(!m_stopSignal)
     {
-        std::cout << "Please Enter Your Query:" << std::endl;
-        std::getline(std::cin, userData);
+        m_output << "Please Enter Your Query:" << std::endl;
+        std::getline(m_input, userData);
 
         if(!userData.empty())
         {
-            std::cout << "[DEBUG] Inserted Query : " << userData << std::endl;
+            m_output << "[DEBUG] Inserted Query : " << userData << std::endl;
 
             userIntent = parseData(userData);
             userData.erase();
 
             handleIntent(userIntent);
         }
-
-
     }
 }
 
@@ -83,8 +83,8 @@ void StaticDataParser::handleIntent(std::shared_ptr<Intent> intent) const
     {
         case Intent::IntentType::WEATHER:
         {
-            std::cout << "Intent: Get Weather" << std::endl;
-            std::cout << m_queryEngine->getWeather() << std::endl;
+            m_output << "Intent: Get Weather" << std::endl;
+            m_output << m_queryEngine->getWeather() << std::endl;
         }
         break;
         case Intent::IntentType::WEATHER_CITY:
@@ -93,25 +93,26 @@ void StaticDataParser::handleIntent(std::shared_ptr<Intent> intent) const
 
             if(weatherCityIntent)
             {
-                std::cout << "Intent: Get Weather City" << std::endl;
-                std::cout << m_queryEngine->getWeatherCity(weatherCityIntent->getCity()) << std::endl;
+                m_output << "Intent: Get Weather City" << std::endl;
+                m_output << m_queryEngine->getWeatherCity(weatherCityIntent->getCity()) << std::endl;
             }
             else
             {
-                std::cerr << "[ERROR] Failed to extract City info from Intent Object" << std::endl;
+                m_error << "[ERROR] Failed to extract City info from Intent Object" << std::endl;
             }
 
         }
         break;
         case Intent::IntentType::FACT:
         {
-            std::cout << m_queryEngine->getFact() << std::endl;
+            m_output << "Intent: Get Fact" << std::endl;
+            m_output << m_queryEngine->getFact() << std::endl;
         }
         break;
         case Intent::IntentType::UNKNOWN:
         default:
         {
-            std::cerr << "[ERROR] unrecognized Intent" << std::endl;
+            m_error << "[ERROR] unrecognized Intent" << std::endl;
         }
         break;
     }

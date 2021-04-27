@@ -11,7 +11,7 @@
 class StaticDataParser : public IDataParser
 {
 public:
-    StaticDataParser(std::shared_ptr<IQueryEngine> queryEngine);
+    StaticDataParser(std::shared_ptr<IQueryEngine> queryEngine, std::istream& input,  std::ostream& output, std::ostream& error);
     ~StaticDataParser() = default;
 
     bool init() override;
